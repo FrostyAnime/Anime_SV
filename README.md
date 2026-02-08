@@ -22,13 +22,13 @@ Since this is a standalone binary, there is no "installation" process.
 2.  Open your terminal and navigate to the download location.
 3.  Make the file executable:
     ```bash
-    chmod +x anime_sv.bin
+    chmod +x anime_sv_x86_64
     ```
 
 ### 2. First Run
 Run the application:
 ```bash
-./anime_sv.bin
+./anime_sv_x86_64
 ```
 
 **On the first launch**, the app will detect that it is running in a new location. It will ask to initialize its file structure. Click **Yes**.
