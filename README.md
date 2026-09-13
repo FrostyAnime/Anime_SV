@@ -1,4 +1,4 @@
-# AnimeSV (Standalone)
+# AnimeSV (Standalone) in process rename to AnimeScape
 
 AnimeSV is a portable, all-in-one desktop application for tracking your anime progress, fetching metadata, and finding releases on Nyaa.si. 
 
