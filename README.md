@@ -1,77 +1,235 @@
-# AnimeSV (Standalone)
+# AnimeScape
 
-AnimeSV is a portable, all-in-one desktop application for tracking your anime progress, fetching metadata, and finding releases on Nyaa.si. 
+AnimeScape is a portable desktop application for tracking anime progress, fetching metadata, and finding releases across multiple providers. It combines a personal database with an integrated torrent client and search engine.
 
-This standalone version (`anime_sv.bin`) comes with everything included—no Python installation or complex setup required.
+## Key Features
 
-## ✨ Key Features
-
-*   **Portable**: Runs as a single executable file. Keep it on a USB drive or anywhere on your system.
-*   **Integrated Downloader**: Includes a built-in torrent client (libtorrent) to download episodes directly within the app.
-*   **Smart Tracking**: Automatically remembers your last watched episode, quality, and fansub group to help you find the next episode instantly.
-*   **Metadata Fetching**: Pulls cover art, descriptions, and titles from MyAnimeList/Jikan.
-*   **Autodownloader**: Can automatically scan for and download new episodes for your entire list.
+- **Multi-Provider Search**: Search **Nyaa.si**, **SubsPlease**, **SeaDex**, and **nekoBT** from one interface.
+- **Integrated Downloader**: Built-in libtorrent client for downloading episodes directly, or open magnet links in an external client.
+- **Smart Tracking**: Remembers your last watched episode, quality, and fansub group to find the next episode automatically.
+- **SxxExx Parsing**: Extracts season/episode identifiers from filenames (supports `S01E05`, `S01 - 05`, `Ep05`, and more). Toggle the SE column from the hamburger menu.
+- **Metadata Fetching**: Pulls cover art, descriptions, genres, and titles from MyAnimeList, AniList, AniDB, and Kitsu with automatic cross-database ID enrichment and fallback chains.
+- **Seasonal Browser**: Browse current and past seasons with genre filtering, origin detection (Chinese/Korean/Japanese), and enrichment status.
+- **Watch Folder Automation**: Trigger downloads by creating a file in your download directory.
+- **Autodownloader**: Bulk scan your entire collection for new episodes.
+- **Configurable Scrape Backend**: Choose BeautifulSoup (default) or Scrapling (adaptive, anti-bot bypass).
+- **Provider Diagnostics**: Test all metadata providers with timing from the hamburger menu.
+- **Requirements Check**: Detects missing Python modules at startup and via the hamburger menu.
+- **Customizable UI**: Theme editor with color/font options, cross-platform scroll wheel support, ESC-to-close on all dialogs.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 1. Installation
-Since this is a standalone binary, there is no "installation" process.
-1.  Download `anime_sv.bin` from the releases page.
-2.  Open your terminal and navigate to the download location.
-3.  Make the file executable:
-    ```bash
-    chmod +x anime_sv_x86_64
-    ```
+### Standalone Binary (Recommended)
 
-### 2. First Run
-Run the application:
+1. Download `AnimeScape.bin` (Linux) or `AnimeScape.exe` (Windows) from the releases page.
+2. Make it executable (Linux):
+   ```bash
+   chmod +x AnimeScape.bin
+   ```
+3. Run:
+   ```bash
+   ./AnimeScape.bin
+   ```
+
+On first launch, the app creates its data directory at `~/.local/share/animescape/` (Linux) and initializes the database.
+
+### Running from Source
+
 ```bash
-./anime_sv_x86_64
+git clone <repo-url>
+cd animescape
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python anime_sv.py
 ```
 
-**On the first launch**, the app will detect that it is running in a new location. It will ask to initialize its file structure. Click **Yes**.
+---
 
-This will create the following items in the same directory as the binary:
-*   `database/`: Stores your anime list and history (CSV files).
-*   `images/`: Stores cached cover art.
-*   `backups/`: Stores automatic backups of your data.
-*   `options.txt`: A configuration file for customizing paths and colors.
+## Requirements
+
+### Python Packages
+
+| Package | Purpose | Required |
+|---|---|---|
+| `requests` | HTTP client | Yes |
+| `beautifulsoup4` | HTML parsing (default scraper) | Yes |
+| `Pillow` | Cover art image processing | Yes |
+| `scrapling[all]` | Adaptive web scraping with anti-bot bypass | Optional |
+| `yt-dlp` | Video/stream extraction (used as CLI tool) | Optional |
+| `libtorrent` | Internal torrent client | Optional |
+| `Nuitka` | Building standalone binary | Build only |
+| `platformdirs` | Cross-platform data directory resolution | Optional (fallback available) |
+
+Install all at once:
+```bash
+pip install -r requirements.txt
+pip install libtorrent  # separate due to binary dependency
+```
+
+### System Dependencies
+
+**Japanese/CJK Font Support** (required for correct title rendering):
+
+| Distro | Command |
+|---|---|
+| Debian/Ubuntu | `sudo apt install fonts-noto-cjk` |
+| Arch Linux | `sudo pacman -S noto-fonts-cjk` |
+| Fedora | `sudo dnf install google-noto-sans-cjk-fonts` |
+
+### Checking Module Availability
+
+The app checks for required modules at startup. You can also check manually via the hamburger menu: **Check Python Modules**. This shows which modules are installed in the current Python environment vs a `.venv`, and provides exact `pip install` commands for anything missing.
 
 ---
 
-## 📖 How to Use
+## How to Use
 
-### Step 1: Build Your Collection
-When you first open the app, your list will be empty.
-1.  Click the **Hamburger Menu (☰)** in the top-right corner of the details pane.
-2.  Select **Manage Anime Shows**.
-3.  Click **Add New Title**.
-4.  Type the name of an anime (e.g., *"Frieren"*) and press Enter.
-5.  Select the correct match from the list. The app will scrape the metadata and add it to your database.
-6.  Repeat for as many shows as you like, then close the Manage window.
+### Building Your Collection
+1. Click the **Hamburger Menu (☰)** → **Manage Titles**.
+2. Click **Add New Title**, type a name (e.g., *"Frieren"*), and select the match.
+3. The app scrapes metadata and adds it to your library.
 
-### Step 2: Finding Releases
-Back in the main window:
-1.  Use the **<< Prev** and **Next >>** buttons (or the slider) to select an anime.
-2.  The right-hand pane will automatically search Nyaa.si for torrents matching that anime.
-3.  **To Download**:
-    *   **Right-click** a result in the list.
-    *   Select **Download (Internal)** to start downloading immediately in the bottom pane.
-    *   *Alternatively*, select **Fetch & Watch** to open the magnet link in your system's default torrent client (e.g., qBittorrent).
+### Finding Releases
+1. Select an anime using **<< Prev** / **Next >>** or the slider.
+2. Choose a **Source** from the dropdown (default: *Nyaa*).
+3. Results appear in the right pane.
+4. **Right-click** a result → **Download (Internal)** or **Fetch & Watch (External)**.
 
-### Step 3: Tracking Progress
-Once you download an episode via the app, it is recorded in your **History**.
-*   The app remembers the **Fansub Group** (e.g., `[SubsPlease]`) and the **Quality** (e.g., `1080p`).
-*   Next time you select that anime, you can click the **Find Next Ep** button. The app will intelligently search for the *next* episode number using your preferred group and quality.
+### Tracking Progress
+- Every download is recorded. The app remembers your preferred **Group**, **Quality**, and **Episode**.
+- **Find Next Ep** searches for the next episode based on your history.
+
+### Watch Folder Automation
+1. Enable **Watch Folder** checkbox in the main window.
+2. Create a file named `Search Term.animeScape` in your download directory (e.g., `Frieren 05.animeScape`).
+3. AnimeScape detects it, finds the best match, and starts the download.
+4. The filename updates to show progress: `Frieren 05.20%` → `Frieren 05.completed`.
+
+### Update Metadata
+Click **Update Metadata** to enrich the current title with data from multiple providers:
+
+1. **MAL Scrape** — primary source (cover art, description, genres, producers, studios)
+2. **MALSync** — MAL→AniDB ID mapping
+3. **arm-server** — AniList→all IDs (AniDB, Kitsu, IMDB, TMDB, TVDB)
+4. **Kitsu mappings** — additional cross-database IDs
+5. **AniList GraphQL** — fallback for missing fields + relations graph
+6. **AniDB HTTP API** — fallback for missing fields + external ID resources
+7. **Prequel/sequel description rescue** — for titles with stub descriptions like "Second season of", finds the original series description via AniList/Kitsu relations or MAL title search
+
+The description box shows a full report with timing, status tags, and all synced IDs.
 
 ---
 
-## ⚙️ Configuration
+## Supported Providers
 
-You can customize the application by editing the `options.txt` file generated after the first run.
+| Provider | Type | Notes |
+|---|---|---|
+| **Nyaa** | Torrents | General anime torrents (default) |
+| **SubsPlease** | Torrents | Direct releases from SubsPlease |
+| **SeaDex** | Index | Best-release index (requires AniList ID) |
+| **nekoBT** | Torrents | JSON API torrent source with MAL/AniList ID search |
 
-*   **`INTERNAL_TORRENT_DL_DIR`**: Change where the built-in downloader saves video files.
-*   **`UI_USE_CUSTOM_THEME`**: Set to "True" to enable custom background colors and fonts.
-*   **`TORRENT_PROFILE`**: Switch between "min_memory" (lightweight) and "high_performance" (faster speeds).
+### API Providers
+
+Selectable from **Hamburger Menu → API Provider**:
+
+| Provider | Description |
+|---|---|
+| **Tenrai** (default) | High-performance MAL API (Jikan v4 compatible) |
+| **Jikan** | Unofficial MAL API |
+| **Kitsu** | JSON:API — no key, includes ID mappings, relations, streaming links |
+
+### Metadata Providers
+
+Used automatically during Update Metadata (not user-selectable):
+
+| Provider | Purpose |
+|---|---|
+| **MAL scrape** | Primary metadata (HTML scraping) |
+| **AniList GraphQL** | Fallback + relations graph + MAL↔AniList mapping |
+| **AniDB HTTP API** | Fallback + external ID resources (MAL/ANN/IMDB/TMDB) |
+| **MALSync API** | MAL→AniDB direct ID mapping |
+| **arm-server** | AniList→all cross-database IDs |
+| **Kitsu** | Fallback + relations + mappings + streaming links |
+
+### Scrape Provider
+
+Selectable from **Hamburger Menu → Scrape Provider**:
+
+| Provider | Description |
+|---|---|
+| **BeautifulSoup** (default) | Traditional HTML parsing |
+| **Scrapling** | Adaptive scraping with anti-bot bypass |
+
+---
+
+## Configuration
+
+Edit `options.txt` in the data directory (`~/.local/share/animescape/options.txt`):
+
+| Key | Description | Default |
+|---|---|---|
+| `INTERNAL_TORRENT_DL_DIR` | Torrent download location | `~/.local/share/animescape/` |
+| `OUTPUT_MAGNET_FILES_DIR` | Magnet file output directory | `~/.local/share/animescape/magnets/` |
+| `UI_USE_CUSTOM_THEME` | Enable custom colors/fonts | `False` |
+| `WATCH_FOLDER_ACTIVE` | Enable watch folder on startup | `False` |
+| `API_PROVIDER` | MAL API backend (`tenrai`, `jikan`, `kitsu`) | `tenrai` |
+| `SCRAPE_PROVIDER` | Web scraping backend | `beautifulsoup` |
+| `SHOW_SE_COLUMN` | Show Series/Episode column in search results | `False` |
+| `TORRENT_PROFILE` | libtorrent performance profile | `min_memory` |
+
+---
+
+## Data Directory
+
+All persistent data lives in `~/.local/share/animescape/` (Linux). The app migrates existing data from the working directory on first run.
+
+```
+~/.local/share/animescape/
+├── options.txt              # User preferences
+├── torrent_client.log       # Torrent client log
+├── database/
+│   ├── anime_details.csv    # Anime metadata
+│   ├── search_terms.csv     # Saved search terms
+│   ├── episode_history.csv  # Download history
+│   ├── auto_downloads.csv   # Autodownload records
+│   ├── anime_data.csv       # Query/MAL mapping
+│   ├── seasonal_cache.json  # Seasonal browser cache
+│   ├── filter_presets.json  # Genre filter presets
+│   └── anilist_id_cache.json # MAL→AniList ID cache
+├── images/                  # Cached cover art
+│   └── seasonal/            # Seasonal browser thumbnails
+├── backups/                 # Automatic database backups
+└── fonts/                   # Custom fonts (optional)
+```
+
+Override with the `ANIMESCAPE_DATA_DIR` environment variable.
+
+---
+
+## Building
+
+```bash
+# Install build dependencies
+pip install nuitka ordered-set
+pip install -r requirements.txt
+pip install libtorrent
+
+# Build standalone binary
+bash build_app.sh
+```
+
+CI builds for Linux and Windows run automatically via GitHub Actions on push.
+
+---
+
+## Seasonal Browser
+
+- **Sort**: By Release Date, Title, or Origin (Chinese → Korean → Japanese → Unknown)
+- **Filter**: Genre filter with presets (Save, Load, Rename, Delete)
+- **Details Pane**: Info tab (synopsis, metadata) and Status tab (enrichment log)
+- **Stale item pruning**: Shows older than 1 year removed automatically
+- **Origin detection**: Detects Chinese/Korean/Japanese origin from Hangul, producer/studio data, and title language codes
